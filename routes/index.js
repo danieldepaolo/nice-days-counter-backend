@@ -29,7 +29,7 @@ router.get("/nicedays", function (req, res) {
         error: null
       })
     })
-    .catch(error => res.json({ data: [], error }));
+    .catch(error => res.status(error.response.status).json({ data: [], error }));
 });
 
 module.exports = router;
