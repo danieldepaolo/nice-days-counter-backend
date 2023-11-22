@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var axios = require('axios');
-var moment = require('moment');
+// var moment = require('moment');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -9,27 +9,41 @@ router.get('/', function(req, res, next) {
 });
 
 router.get("/nicedays", function (req, res) {
-  const { lat, lon, startdate, enddate } = req.query;
+  const {
+    lat,
+    lon,
+    startdate,
+    enddate,
+    daily_variables = "apparent_temperature_max,apparent_temperature_min,sunshine_duration,rain_sum,precipitation_hours"
+  } = req.query;
 
-  const curr = moment(startdate).startOf('day');
-  const end = moment(enddate).startOf('day');
-  let requests = [];
-  while(!curr.isAfter(end)) {
-    const url = `https://api.darksky.net/forecast/${process.env.DARK_SKY_API_KEY}/${lat},${lon},${
-      `${curr.format("YYYY-MM-DD")}T00:00:00`}?exclude=currently,hourly`;
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${startdate}&end_date=${enddate}&daily=${daily_variables}&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=America%2FLos_Angeles`
+  console.log(url)
 
-    requests.push(axios(url));
-    curr.add(1, 'days');
-  }
+  axios.get(url)
+    .then(({ data }) => {
+      const dailyVariables = daily_variables.split(',')
+      console.log(data)
+      const responseData = {
+        ...data,
+        daily: data.daily.time.map((day, index) => {
+          const dailyData = { day }
+          dailyVariables.forEach(variable => {
+            dailyData[variable] = data.daily[variable][index]
+          })
+          return dailyData
+        })
+      }
 
-  axios.all(requests)
-    .then(dayArray => {
       res.json({
-        data: dayArray.map(day => day.data),
+        data: responseData,
         error: null
       })
     })
-    .catch(error => res.status(error.response.status).json({ data: [], error }));
+    .catch(error => {
+      console.log(error)
+      res.status(error).json({ data: {}, error })
+    });
 });
 
 module.exports = router;
