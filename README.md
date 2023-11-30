@@ -1,4 +1,4 @@
-# nice-days-counter-backend
+# Nice Days Counter Backend
 Backend API for my Nice Days Counter app
 
 <!-- TABLE OF CONTENTS -->
