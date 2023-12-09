@@ -1,5 +1,6 @@
 # Nice Days Counter Backend
 Backend API for my Nice Days Counter app
+12/8/2023: Not used anymore. nice-days-counter simply calls the weather API directly.
 
 <!-- TABLE OF CONTENTS -->
 <details>
